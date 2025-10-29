@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "838788857321",
+    "project_id": "flutter-login-app-3ce09",
+    "storage_bucket": "flutter-login-app-3ce09.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838788857321:android:360c43dc1aab17907adf78",
+        "android_client_info": {
+          "package_name": "com.example.login_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBooW-4dQdZevoWDvIXQT5jx4Y4qAj0qWw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
