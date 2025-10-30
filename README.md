@@ -14,6 +14,7 @@
 - StreamBuilder theo dõi auth state
 - UI đẹp và user-friendly
 - Error handling đầy đủ
+- Đăng nhập với Google, Facebook và Github
 ## Cài đặt
 - Clone repository:
   ```bash
