@@ -1,88 +1,6 @@
-// import 'package:firebase_auth/firebase_auth.dart';
-
-// class AuthService {
-//   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-//   // Lấy user hiện tại
-//   User? get currentUser => _auth.currentUser;
-
-//   // Stream theo dõi trạng thái đăng nhập
-//   Stream<User?> get authStateChanges => _auth.authStateChanges();
-
-//   // Đăng ký với email và password
-//   Future<UserCredential?> signUpWithEmailPassword({
-//     required String email,
-//     required String password,
-//   }) async {
-//     try {
-//       UserCredential userCredential = await _auth
-//           .createUserWithEmailAndPassword(email: email, password: password);
-//       return userCredential;
-//     } on FirebaseAuthException catch (e) {
-//       // Xử lý các lỗi cụ thể
-//       if (e.code == 'weak-password') {
-//         throw 'Mật khẩu quá yếu.';
-//       } else if (e.code == 'email-already-in-use') {
-//         throw 'Email này đã được sử dụng.';
-//       } else if (e.code == 'invalid-email') {
-//         throw 'Email không hợp lệ.';
-//       } else {
-//         throw 'Đã xảy ra lỗi: ${e.message}';
-//       }
-//     } catch (e) {
-//       throw 'Đã xảy ra lỗi không xác định.';
-//     }
-//   }
-
-//   // Đăng nhập với email và password
-//   Future<UserCredential?> signInWithEmailPassword({
-//     required String email,
-//     required String password,
-//   }) async {
-//     try {
-//       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-//         email: email,
-//         password: password,
-//       );
-//       return userCredential;
-//     } on FirebaseAuthException catch (e) {
-//       if (e.code == 'user-not-found') {
-//         throw 'Không tìm thấy tài khoản với email này.';
-//       } else if (e.code == 'wrong-password') {
-//         throw 'Mật khẩu không chính xác.';
-//       } else if (e.code == 'invalid-email') {
-//         throw 'Email không hợp lệ.';
-//       } else if (e.code == 'user-disabled') {
-//         throw 'Tài khoản đã bị vô hiệu hóa.';
-//       } else {
-//         throw 'Đã xảy ra lỗi: ${e.message}';
-//       }
-//     } catch (e) {
-//       throw 'Đã xảy ra lỗi không xác định.';
-//     }
-//   }
-
-//   // Đăng xuất
-//   Future<void> signOut() async {
-//     await _auth.signOut();
-//   }
-
-//   // Gửi email reset password
-//   Future<void> sendPasswordResetEmail(String email) async {
-//     try {
-//       await _auth.sendPasswordResetEmail(email: email);
-//     } on FirebaseAuthException catch (e) {
-//       if (e.code == 'user-not-found') {
-//         throw 'Không tìm thấy tài khoản với email này.';
-//       } else {
-//         throw 'Đã xảy ra lỗi: ${e.message}';
-//       }
-//     }
-//   }
-// }
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -184,6 +102,85 @@ class AuthService {
         throw 'Tài khoản đã tồn tại với phương thức đăng nhập khác.';
       } else if (e.code == 'invalid-credential') {
         throw 'Thông tin xác thực không hợp lệ.';
+      } else {
+        throw 'Đã xảy ra lỗi: ${e.message}';
+      }
+    } catch (e) {
+      throw 'Đã xảy ra lỗi: $e';
+    }
+  }
+
+  // ==================== FACEBOOK SIGN-IN ====================
+
+  // Đăng nhập với Facebook
+  Future<UserCredential?> signInWithFacebook() async {
+    try {
+      // Trigger Facebook Sign-In flow
+      final LoginResult loginResult = await FacebookAuth.instance.login(
+        permissions: ['email', 'public_profile'],
+      );
+
+      // Kiểm tra status
+      if (loginResult.status == LoginStatus.success) {
+        // Lấy access token
+        final AccessToken? accessToken = loginResult.accessToken;
+
+        if (accessToken == null) {
+          throw 'Không thể lấy access token từ Facebook.';
+        }
+
+        // Tạo credential cho Firebase
+        final OAuthCredential credential = FacebookAuthProvider.credential(
+          accessToken.tokenString,
+        );
+
+        // Đăng nhập vào Firebase
+        return await _auth.signInWithCredential(credential);
+      } else if (loginResult.status == LoginStatus.cancelled) {
+        throw 'Đăng nhập Facebook bị hủy.';
+      } else {
+        throw 'Đăng nhập Facebook thất bại: ${loginResult.message}';
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'account-exists-with-different-credential') {
+        throw 'Email này đã được sử dụng với phương thức đăng nhập khác.';
+      } else if (e.code == 'invalid-credential') {
+        throw 'Thông tin xác thực Facebook không hợp lệ.';
+      } else {
+        throw 'Đã xảy ra lỗi: ${e.message}';
+      }
+    } catch (e) {
+      throw 'Đã xảy ra lỗi: $e';
+    }
+  }
+
+  // ==================== GITHUB SIGN-IN ====================
+
+  // Đăng nhập với GitHub
+  Future<UserCredential?> signInWithGitHub() async {
+    try {
+      // Tạo GitHub provider
+      GithubAuthProvider githubProvider = GithubAuthProvider();
+
+      // Thêm scopes nếu cần
+      githubProvider.addScope('read:user');
+      githubProvider.addScope('user:email');
+
+      // Sign in với provider (Mobile sẽ mở browser)
+      UserCredential userCredential = await _auth.signInWithProvider(
+        githubProvider,
+      );
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'account-exists-with-different-credential') {
+        throw 'Email này đã được sử dụng với phương thức đăng nhập khác.';
+      } else if (e.code == 'invalid-credential') {
+        throw 'Thông tin xác thực GitHub không hợp lệ.';
+      } else if (e.code == 'operation-not-allowed') {
+        throw 'Đăng nhập GitHub chưa được kích hoạt. Vui lòng kiểm tra Firebase Console.';
+      } else if (e.code == 'user-cancelled') {
+        throw 'Đăng nhập GitHub bị hủy.';
       } else {
         throw 'Đã xảy ra lỗi: ${e.message}';
       }
@@ -313,6 +310,7 @@ class AuthService {
     await Future.wait([
       _auth.signOut(),
       _googleSignIn.signOut(), // Đăng xuất khỏi Google
+      FacebookAuth.instance.logOut(), // Đăng xuất khỏi Facebook
     ]);
   }
 

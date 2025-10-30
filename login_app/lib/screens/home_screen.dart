@@ -22,7 +22,6 @@
 //   }
 
 //   Future<void> _handleLogout() async {
-//     // Hiển thị dialog xác nhận
 //     final confirmed = await showDialog<bool>(
 //       context: context,
 //       builder: (context) => AlertDialog(
@@ -53,7 +52,6 @@
 //             ),
 //           );
 //         }
-//         // StreamBuilder sẽ tự động chuyển về LoginScreen
 //       } catch (e) {
 //         if (mounted) {
 //           ScaffoldMessenger.of(context).showSnackBar(
@@ -75,109 +73,242 @@
 //         centerTitle: true,
 //         actions: [
 //           IconButton(
+//             icon: const Icon(Icons.edit),
+//             onPressed: () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(builder: (context) => const ProfileScreen()),
+//               ).then((_) {
+//                 setState(() {
+//                   _user = _authService.currentUser;
+//                 });
+//               });
+//             },
+//             tooltip: 'Chỉnh sửa thông tin',
+//           ),
+//           IconButton(
 //             icon: const Icon(Icons.logout),
 //             onPressed: _handleLogout,
 //             tooltip: 'Đăng xuất',
 //           ),
 //         ],
 //       ),
-//       body: Center(
-//         child: Padding(
-//           padding: const EdgeInsets.all(24.0),
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.center,
-//             children: [
-//               // Avatar
-//               CircleAvatar(
-//                 radius: 60,
-//                 backgroundColor: Theme.of(
-//                   context,
-//                 ).primaryColor.withOpacity(0.2),
-//                 child: Icon(
-//                   Icons.person,
-//                   size: 60,
-//                   color: Theme.of(context).primaryColor,
+//       body: SafeArea(
+//         child: SingleChildScrollView(
+//           child: Padding(
+//             padding: const EdgeInsets.all(24.0),
+//             child: Column(
+//               // mainAxisAlignment: MainAxisAlignment.center, // Nên bỏ để cuộn tự nhiên
+//               children: [
+//                 // Avatar
+//                 CircleAvatar(
+//                   radius: 60,
+//                   backgroundColor: Theme.of(
+//                     context,
+//                   ).primaryColor.withOpacity(0.2),
+//                   backgroundImage: _user?.photoURL != null
+//                       ? NetworkImage(_user!.photoURL!)
+//                       : null,
+//                   child: _user?.photoURL == null
+//                       ? Icon(
+//                           Icons.person,
+//                           size: 60,
+//                           color: Theme.of(context).primaryColor,
+//                         )
+//                       : null,
 //                 ),
-//               ),
-//               const SizedBox(height: 32),
+//                 const SizedBox(height: 32),
 
-//               // Welcome Text
-//               Text(
-//                 'Chào mừng!',
-//                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-//                   fontWeight: FontWeight.bold,
+//                 // Welcome Text
+//                 Text(
+//                   _user?.displayName != null
+//                       ? 'Chào ${_user!.displayName}!'
+//                       : 'Chào mừng!',
+//                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                   textAlign: TextAlign.center,
 //                 ),
-//               ),
-//               const SizedBox(height: 16),
+//                 const SizedBox(height: 16),
 
-//               // User Info Card
-//               Card(
-//                 elevation: 2,
-//                 child: Padding(
-//                   padding: const EdgeInsets.all(20.0),
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text(
-//                         'Thông Tin Tài Khoản',
-//                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-//                           fontWeight: FontWeight.bold,
+//                 // User Info Card
+//                 Card(
+//                   elevation: 2,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(20.0),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Text(
+//                           'Thông Tin Tài Khoản',
+//                           style: Theme.of(context).textTheme.titleLarge
+//                               ?.copyWith(fontWeight: FontWeight.bold),
 //                         ),
-//                       ),
-//                       const Divider(height: 24),
+//                         const Divider(height: 24),
 
-//                       // Email
-//                       _buildInfoRow(
-//                         icon: Icons.email,
-//                         label: 'Email',
-//                         value: _user?.email ?? 'N/A',
-//                       ),
-//                       const SizedBox(height: 12),
+//                         // Display Name
+//                         if (_user?.displayName != null)
+//                           _buildInfoRow(
+//                             icon: Icons.person,
+//                             label: 'Tên hiển thị',
+//                             value: _user!.displayName!,
+//                           ),
+//                         if (_user?.displayName != null)
+//                           const SizedBox(height: 12),
 
-//                       // User ID
-//                       _buildInfoRow(
-//                         icon: Icons.fingerprint,
-//                         label: 'User ID',
-//                         value: _user?.uid ?? 'N/A',
-//                       ),
-//                       const SizedBox(height: 12),
-
-//                       // Email Verified
-//                       _buildInfoRow(
-//                         icon: Icons.verified_user,
-//                         label: 'Email đã xác thực',
-//                         value: _user?.emailVerified == true ? 'Có' : 'Chưa',
-//                       ),
-//                       const SizedBox(height: 12),
-
-//                       // Creation Time
-//                       if (_user?.metadata.creationTime != null)
+//                         // Email
 //                         _buildInfoRow(
-//                           icon: Icons.calendar_today,
-//                           label: 'Ngày tạo',
-//                           value: _formatDate(_user!.metadata.creationTime!),
+//                           icon: Icons.email,
+//                           label: 'Email',
+//                           value: _user?.email ?? 'N/A',
 //                         ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//               const SizedBox(height: 32),
+//                         const SizedBox(height: 12),
 
-//               // Logout Button
-//               OutlinedButton.icon(
-//                 onPressed: _handleLogout,
-//                 icon: const Icon(Icons.logout),
-//                 label: const Text('Đăng Xuất'),
-//                 style: OutlinedButton.styleFrom(
-//                   padding: const EdgeInsets.symmetric(
-//                     horizontal: 32,
-//                     vertical: 12,
+//                         // User ID
+//                         _buildInfoRow(
+//                           icon: Icons.fingerprint,
+//                           label: 'User ID',
+//                           value: _user?.uid ?? 'N/A',
+//                         ),
+//                         const SizedBox(height: 12),
+
+//                         // Email Verified
+//                         _buildInfoRow(
+//                           icon: Icons.verified_user,
+//                           label: 'Email đã xác thực',
+//                           value: _user?.emailVerified == true ? 'Có' : 'Chưa',
+//                         ),
+//                         const SizedBox(height: 12),
+
+//                         // Provider
+//                         _buildInfoRow(
+//                           icon: Icons.security,
+//                           label: 'Phương thức đăng nhập',
+//                           value: _getProviderName(),
+//                         ),
+//                         const SizedBox(height: 12),
+
+//                         // Creation Time
+//                         if (_user?.metadata.creationTime != null)
+//                           _buildInfoRow(
+//                             icon: Icons.calendar_today,
+//                             label: 'Ngày tạo',
+//                             value: _formatDate(_user!.metadata.creationTime!),
+//                           ),
+//                       ],
+//                     ),
 //                   ),
-//                   foregroundColor: Colors.red,
-//                   side: const BorderSide(color: Colors.red),
 //                 ),
-//               ),
-//             ],
+//                 const SizedBox(height: 16),
+
+//                 // Email Verification Warning
+//                 if (_user?.emailVerified == false &&
+//                     _user?.providerData.any(
+//                           (info) => info.providerId == 'password',
+//                         ) ==
+//                         true)
+//                   Container(
+//                     padding: const EdgeInsets.all(12),
+//                     decoration: BoxDecoration(
+//                       color: Colors.orange.withOpacity(0.1),
+//                       borderRadius: BorderRadius.circular(8),
+//                       border: Border.all(color: Colors.orange),
+//                     ),
+//                     child: Row(
+//                       children: [
+//                         const Icon(Icons.warning_amber, color: Colors.orange),
+//                         const SizedBox(width: 12),
+//                         Expanded(
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               const Text(
+//                                 'Email chưa xác thực',
+//                                 style: TextStyle(fontWeight: FontWeight.bold),
+//                               ),
+//                               const SizedBox(height: 4),
+//                               GestureDetector(
+//                                 onTap: () {
+//                                   Navigator.push(
+//                                     context,
+//                                     MaterialPageRoute(
+//                                       builder: (context) =>
+//                                           const EmailVerificationScreen(),
+//                                     ),
+//                                   ).then((_) {
+//                                     setState(() {
+//                                       _user = _authService.currentUser;
+//                                     });
+//                                   });
+//                                 },
+//                                 child: const Text(
+//                                   'Nhấn để xác thực ngay',
+//                                   style: TextStyle(
+//                                     color: Colors.blue,
+//                                     decoration: TextDecoration.underline,
+//                                   ),
+//                                 ),
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 if (_user?.emailVerified == false &&
+//                     _user?.providerData.any(
+//                           (info) => info.providerId == 'password',
+//                         ) ==
+//                         true)
+//                   const SizedBox(height: 16),
+
+//                 // Verify Email Button (nếu chưa verified)
+//                 if (_user?.emailVerified == false &&
+//                     _user?.providerData.any(
+//                           (info) => info.providerId == 'password',
+//                         ) ==
+//                         true)
+//                   ElevatedButton.icon(
+//                     onPressed: () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(
+//                           builder: (context) => const EmailVerificationScreen(),
+//                         ),
+//                       ).then((_) {
+//                         setState(() {
+//                           _user = _authService.currentUser;
+//                         });
+//                       });
+//                     },
+//                     icon: const Icon(Icons.mark_email_read),
+//                     label: const Text('Xác Thực Email'),
+//                     style: ElevatedButton.styleFrom(
+//                       padding: const EdgeInsets.symmetric(
+//                         horizontal: 32,
+//                         vertical: 12,
+//                       ),
+//                       backgroundColor: Colors.orange,
+//                     ),
+//                   ),
+//                 if (_user?.emailVerified == false) const SizedBox(height: 12),
+
+//                 // Logout Button
+//                 OutlinedButton.icon(
+//                   onPressed: _handleLogout,
+//                   icon: const Icon(Icons.logout),
+//                   label: const Text('Đăng Xuất'),
+//                   style: OutlinedButton.styleFrom(
+//                     padding: const EdgeInsets.symmetric(
+//                       horizontal: 32,
+//                       vertical: 12,
+//                     ),
+//                     foregroundColor: Colors.red,
+//                     side: const BorderSide(color: Colors.red),
+//                   ),
+//                 ),
+//               ],
+//             ),
 //           ),
 //         ),
 //       ),
@@ -220,6 +351,22 @@
 //   String _formatDate(DateTime date) {
 //     return '${date.day}/${date.month}/${date.year}';
 //   }
+
+//   String _getProviderName() {
+//     if (_user?.providerData.isEmpty ?? true) return 'N/A';
+
+//     final provider = _user!.providerData.first.providerId;
+//     switch (provider) {
+//       case 'google.com':
+//         return 'Google';
+//       case 'password':
+//         return 'Email/Password';
+//       case 'facebook.com':
+//         return 'Facebook';
+//       default:
+//         return provider;
+//     }
+//   }
 // }
 
 import 'package:flutter/material.dart';
@@ -246,7 +393,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _handleLogout() async {
-    // Hiển thị dialog xác nhận
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -277,7 +423,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         }
-        // StreamBuilder sẽ tự động chuyển về LoginScreen
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -289,6 +434,17 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     }
+  }
+
+  // Hàm kiểm tra có cần xác thực email không (cho cả Facebook và Email/Password)
+  bool _needVerifyEmail() {
+    if (_user == null) return false;
+    if (_user!.emailVerified == true) return false;
+    // Kiểm tra nếu provider là email/password hoặc facebook
+    return _user!.providerData.any(
+      (info) =>
+          info.providerId == 'password' || info.providerId == 'facebook.com',
+    );
   }
 
   @override
@@ -305,7 +461,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => const ProfileScreen()),
               ).then((_) {
-                // Refresh user data khi quay lại
                 setState(() {
                   _user = _authService.currentUser;
                 });
@@ -320,216 +475,208 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Avatar
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: Theme.of(
-                  context,
-                ).primaryColor.withOpacity(0.2),
-                backgroundImage: _user?.photoURL != null
-                    ? NetworkImage(_user!.photoURL!)
-                    : null,
-                child: _user?.photoURL == null
-                    ? Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
-              ),
-              const SizedBox(height: 32),
-
-              // Welcome Text
-              Text(
-                _user?.displayName != null
-                    ? 'Chào ${_user!.displayName}!'
-                    : 'Chào mừng!',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                // Avatar
+                CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).primaryColor.withOpacity(0.2),
+                  backgroundImage: _user?.photoURL != null
+                      ? NetworkImage(_user!.photoURL!)
+                      : null,
+                  child: _user?.photoURL == null
+                      ? Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Theme.of(context).primaryColor,
+                        )
+                      : null,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 32),
 
-              // User Info Card
-              Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Thông Tin Tài Khoản',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                // Welcome Text
+                Text(
+                  _user?.displayName != null
+                      ? 'Chào ${_user!.displayName}!'
+                      : 'Chào mừng!',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+
+                // User Info Card
+                Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Thông Tin Tài Khoản',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      const Divider(height: 24),
+                        const Divider(height: 24),
 
-                      // Display Name
-                      if (_user?.displayName != null)
+                        // Display Name
+                        if (_user?.displayName != null)
+                          _buildInfoRow(
+                            icon: Icons.person,
+                            label: 'Tên hiển thị',
+                            value: _user!.displayName!,
+                          ),
+                        if (_user?.displayName != null)
+                          const SizedBox(height: 12),
+
+                        // Email
                         _buildInfoRow(
-                          icon: Icons.person,
-                          label: 'Tên hiển thị',
-                          value: _user!.displayName!,
+                          icon: Icons.email,
+                          label: 'Email',
+                          value: _user?.email ?? 'N/A',
                         ),
-                      if (_user?.displayName != null)
                         const SizedBox(height: 12),
 
-                      // Email
-                      _buildInfoRow(
-                        icon: Icons.email,
-                        label: 'Email',
-                        value: _user?.email ?? 'N/A',
-                      ),
-                      const SizedBox(height: 12),
-
-                      // User ID
-                      _buildInfoRow(
-                        icon: Icons.fingerprint,
-                        label: 'User ID',
-                        value: _user?.uid ?? 'N/A',
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Email Verified
-                      _buildInfoRow(
-                        icon: Icons.verified_user,
-                        label: 'Email đã xác thực',
-                        value: _user?.emailVerified == true ? 'Có' : 'Chưa',
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Provider
-                      _buildInfoRow(
-                        icon: Icons.security,
-                        label: 'Phương thức đăng nhập',
-                        value: _getProviderName(),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Creation Time
-                      if (_user?.metadata.creationTime != null)
+                        // User ID
                         _buildInfoRow(
-                          icon: Icons.calendar_today,
-                          label: 'Ngày tạo',
-                          value: _formatDate(_user!.metadata.creationTime!),
+                          icon: Icons.fingerprint,
+                          label: 'User ID',
+                          value: _user?.uid ?? 'N/A',
                         ),
-                    ],
+                        const SizedBox(height: 12),
+
+                        // Email Verified
+                        _buildInfoRow(
+                          icon: Icons.verified_user,
+                          label: 'Email đã xác thực',
+                          value: _user?.emailVerified == true ? 'Có' : 'Chưa',
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Provider
+                        _buildInfoRow(
+                          icon: Icons.security,
+                          label: 'Phương thức đăng nhập',
+                          value: _getProviderName(),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Creation Time
+                        if (_user?.metadata.creationTime != null)
+                          _buildInfoRow(
+                            icon: Icons.calendar_today,
+                            label: 'Ngày tạo',
+                            value: _formatDate(_user!.metadata.creationTime!),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Email Verification Warning
-              if (_user?.emailVerified == false &&
-                  _user?.providerData.any(
-                        (info) => info.providerId == 'password',
-                      ) ==
-                      true)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.warning_amber, color: Colors.orange),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Email chưa xác thực',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 4),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const EmailVerificationScreen(),
-                                  ),
-                                ).then((_) {
-                                  setState(() {
-                                    _user = _authService.currentUser;
+                // Email Verification Warning (cho cả Facebook và Email/Password)
+                if (_needVerifyEmail())
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.orange),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber, color: Colors.orange),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Email chưa xác thực',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const EmailVerificationScreen(),
+                                    ),
+                                  ).then((_) {
+                                    setState(() {
+                                      _user = _authService.currentUser;
+                                    });
                                   });
-                                });
-                              },
-                              child: const Text(
-                                'Nhấn để xác thực ngay',
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
+                                },
+                                child: const Text(
+                                  'Nhấn để xác thực ngay',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              const SizedBox(height: 32),
+                if (_needVerifyEmail()) const SizedBox(height: 16),
 
-              // Verify Email Button (nếu chưa verified)
-              if (_user?.emailVerified == false &&
-                  _user?.providerData.any(
-                        (info) => info.providerId == 'password',
-                      ) ==
-                      true)
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const EmailVerificationScreen(),
-                      ),
-                    ).then((_) {
-                      setState(() {
-                        _user = _authService.currentUser;
+                // Verify Email Button (cho cả Facebook và Email/Password)
+                if (_needVerifyEmail())
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EmailVerificationScreen(),
+                        ),
+                      ).then((_) {
+                        setState(() {
+                          _user = _authService.currentUser;
+                        });
                       });
-                    });
-                  },
-                  icon: const Icon(Icons.mark_email_read),
-                  label: const Text('Xác Thực Email'),
-                  style: ElevatedButton.styleFrom(
+                    },
+                    icon: const Icon(Icons.mark_email_read),
+                    label: const Text('Xác Thực Email'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 12,
+                      ),
+                      backgroundColor: Colors.orange,
+                    ),
+                  ),
+                if (_needVerifyEmail()) const SizedBox(height: 12),
+
+                // Logout Button
+                OutlinedButton.icon(
+                  onPressed: _handleLogout,
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Đăng Xuất'),
+                  style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,
                       vertical: 12,
                     ),
-                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
                   ),
                 ),
-              if (_user?.emailVerified == false) const SizedBox(height: 12),
-
-              // Logout Button
-              OutlinedButton.icon(
-                onPressed: _handleLogout,
-                icon: const Icon(Icons.logout),
-                label: const Text('Đăng Xuất'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
